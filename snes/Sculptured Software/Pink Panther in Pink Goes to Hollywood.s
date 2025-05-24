@@ -1610,11 +1610,9 @@
 16f6: f8 5d     mov   x,$5d
 16f8: d5 a0 05  mov   $05a0+x,a
 16fb: 5f 87 16  jmp   $1687
-16fe: 99        adc   (x),(y)
-16ff: 16 a4 16  or    a,$16a4+y
-1702: b3 16 be  bbc5  $16,$16c3
-1705: 16 cf 16  or    a,$16cf+y
-1708: e7 16     mov   a,($16+x)
+
+16fe: dw $1687, $1699, $16a4, $16b3, $16be, $16cf, $16e7
+
 170a: 8d 93     mov   y,#$93
 170c: f9 5a     mov   x,$5a+y
 170e: f6 b7 05  mov   a,$05b7+y
