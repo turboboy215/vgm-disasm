@@ -1454,6 +1454,7 @@
 157e: f5 88 05  mov   a,$0588+x
 1581: c4 60     mov   $60,a
 1583: 5f d6 13  jmp   $13d6
+
 1586: e4 00     mov   a,$00
 1588: 1c        asl   a
 1589: 44 00     eor   a,$00
@@ -1468,6 +1469,7 @@
 1597: 3f 9e 15  call  $159e
 159a: 5d        mov   x,a
 159b: 1f 6f 16  jmp   ($166f+x)
+
 159e: f8 5e     mov   x,$5e
 15a0: e7 7b     mov   a,($7b+x)
 15a2: bb 7b     inc   $7b+x
@@ -1607,11 +1609,9 @@
 16f6: f8 5d     mov   x,$5d
 16f8: d5 a0 05  mov   $05a0+x,a
 16fb: 5f 87 16  jmp   $1687
-16fe: 99        adc   (x),(y)
-16ff: 16 a4 16  or    a,$16a4+y
-1702: b3 16 be  bbc5  $16,$16c3
-1705: 16 cf 16  or    a,$16cf+y
-1708: e7 16     mov   a,($16+x)
+
+16fc: dw $1699,$16a4,$16b3,$16be,$16cf,$16e7
+
 170a: 8d 93     mov   y,#$93
 170c: f9 5a     mov   x,$5a+y
 170e: f6 b7 05  mov   a,$05b7+y
