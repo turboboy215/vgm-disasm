@@ -1,13 +1,13 @@
 0700: 20        clrp
-0701: cd ff     mov   x,#$ff
+0701: cd ff     mov   x,#$ff		; set stack pointer
 0703: bd        mov   sp,x
-0704: 8f b0 f1  mov   $f1,#$b0
+0704: 8f b0 f1  mov   $f1,#$b0		; clear input ports APUI00-APUI04
 0707: 8f 20 fa  mov   $fa,#$20
-070a: 8f 81 f1  mov   $f1,#$81
-070d: 3f ca 0e  call  $0eca
+070a: 8f 81 f1  mov   $f1,#$81		; toggle timer 2
+070d: 3f ca 0e  call  $0eca		; clear/reset routine
 0710: 8f 00 13  mov   $13,#$00
 0713: 8f 1a 14  mov   $14,#$1a
-0716: 8d 03     mov   y,#$03
+0716: 8d 03     mov   y,#$03		; set temporary storage
 0718: f6 00 00  mov   a,$0000+y
 071b: 16 22 07  or    a,$0722+y
 071e: d6 00 00  mov   $0000+y,a
@@ -15,7 +15,7 @@
 0723: ab 1d     inc   $1d
 0725: e4 23     mov   a,$23
 0727: d0 05     bne   $072e
-0729: 3f 54 18  call  $1854
+0729: 3f 54 18  call  $1854		; do a random number generator (RNG)
 072c: 2f 03     bra   $0731
 072e: 3f 51 08  call  $0851
 0731: e4 f6     mov   a,$f6
@@ -47,6 +47,7 @@
 0769: d0 05     bne   $0770
 076b: d8 f5     mov   $f5,x
 076d: 1f 04 00  jmp   ($0004+x)
+
 0770: cd 00     mov   x,#$00
 0772: 3e f4     cmp   x,$f4
 0774: d0 fc     bne   $0772
@@ -71,21 +72,36 @@
 079c: 90 f5     bcc   $0793
 079e: 5f 00 01  jmp   $0100
 
+; gain tables
 07a1: db $ff,$d6,$a0,$80,$6b,$50,$40,$36,$28,$20,$1b,$14,$10,$0e,$0b,$08
 07b1: db $06,$05,$04,$03,$02,$01,$1d,$1c,$1b,$1a,$19,$18,$17,$16,$15,$14,$13,$12,$11,$10,$0f,$0e,$0d,$0c,$0a,$09,$06,$00
+
+; DSP registers: VxENVX
 07cd: db $08,$18,$28,$38,$48,$58,$68,$78
+; DSP registers: VxGAIN
 07d5: db $07,$17,$27,$37,$47,$57,$67,$77
+; DSP registers: VxSCRN (select sample)
 07dd: db $04,$14,$24,$34,$44,$54,$64,$74
+; DSP registers: VxPITCHL
 07e5: db $02,$12,$22,$32,$42,$52,$62,$72
+; DSP registers: VxVOLL
 07ed: db $00,$10,$20,$30,$40,$50,$60,$70
+
+; voice numbers and bits for clearing those void bits
 07f5: db $01,$02,$04,$08,$10,$20,$40,$80,$fe,$fd,$fb,$f7,$ef,$df,$bf,$7f
+
+; echo poke registers
 0805: db $7d,$2c,$3c,$0d,$0f,$1f,$2f,$3f,$4f,$5f,$6f,$7f
+
 0811: db $02,$02,$02,$02,$02,$03,$03,$03
 0819: db $9e,$b3,$c8,$dd,$f2,$07,$1c,$31
+
 0821: db $03,$03,$03,$03,$03,$03,$03,$03
 0829: db $46,$5b,$70,$85,$9a,$af,$c4,$d9
+
 0831: db $03,$04,$04,$04,$04,$04,$04,$04
 0839: db $ee,$03,$18,$2d,$42,$57,$6c,$81
+
 0841: db $04,$04,$04,$04,$04,$05,$05,$05
 0849: db $96,$ac,$c2,$d8,$ee,$04,$1a,$30
 
@@ -105,7 +121,7 @@
 0868: 3f 86 0b  call  $0b86
 086b: 8f 00 37  mov   $37,#$00
 086e: 8f 00 4c  mov   $4c,#$00
-0871: 8f 7c f2  mov   $f2,#$7c
+0871: 8f 7c f2  mov   $f2,#$7c			; clear end of sample flags?
 0874: e4 f3     mov   a,$f3
 0876: 04 49     or    a,$49
 0878: 24 4f     and   a,$4f
@@ -119,7 +135,7 @@
 088a: 8f 04 16  mov   $16,#$04
 088d: 3f 75 0b  call  $0b75
 0890: d8 17     mov   $17,x
-0892: f5 f5 07  mov   a,$07f5+x
+0892: f5 f5 07  mov   a,$07f5+x			; clear voice number bits
 0895: c4 39     mov   $39,a
 0897: 48 ff     eor   a,#$ff
 0899: c4 3a     mov   $3a,a
@@ -129,6 +145,7 @@
 08a1: d0 06     bne   $08a9
 08a3: f5 7e 02  mov   a,$027e+x
 08a6: 5f ae 08  jmp   $08ae
+
 08a9: 3f 08 10  call  $1008
 08ac: f8 17     mov   x,$17
 08ae: 75 86 02  cmp   a,$0286+x
@@ -176,6 +193,7 @@
 090b: b8 15 15  sbc   $15,#$15
 090e: b8 00 16  sbc   $16,#$00
 0911: 5f 8d 08  jmp   $088d
+
 0914: e4 4d     mov   a,$4d
 0916: 24 4b     and   a,$4b
 0918: 04 4c     or    a,$4c
@@ -196,6 +214,7 @@
 093b: d0 06     bne   $0943
 093d: f5 76 02  mov   a,$0276+x
 0940: 5f 48 09  jmp   $0948
+
 0943: 3f 08 10  call  $1008
 0946: f8 17     mov   x,$17
 0948: fd        mov   y,a
@@ -233,6 +252,7 @@
 0985: 1d        dec   x
 0986: 30 03     bmi   $098b
 0988: 5f 2c 09  jmp   $092c
+
 098b: cd 07     mov   x,#$07
 098d: 8f d9 15  mov   $15,#$d9
 0990: 8f 03 16  mov   $16,#$03
@@ -249,15 +269,15 @@
 09a3: fd        mov   y,a
 09a4: 1c        asl   a
 09a5: 5d        mov   x,a
-09a6: f5 4f 02  mov   a,$024f+x
+09a6: f5 4f 02  mov   a,$024f+x		; get base note
 09a9: c4 36     mov   $36,a
 09ab: f5 4e 02  mov   a,$024e+x
 09ae: c4 35     mov   $35,a
 09b0: 8e        pop   psw
 09b1: f0 11     beq   $09c4
-09b3: 4d        push  x
-09b4: 3f 08 10  call  $1008
-09b7: ce        pop   x
+09b3: 4d        push  x			; save word addressing
+09b4: 3f 08 10  call  $1008		; advance pitch envelope
+09b7: ce        pop   x			; restore pitch flag
 09b8: 7a 35     addw  ya,$35
 09ba: 80        setc
 09bb: a8 b0     sbc   a,#$b0
@@ -271,7 +291,7 @@
 09cb: 7a 35     addw  ya,$35
 09cd: 8e        pop   psw
 09ce: d0 03     bne   $09d3
-09d0: 3f cc 11  call  $11cc
+09d0: 3f cc 11  call  $11cc		; translate note to frequency
 09d3: f8 17     mov   x,$17
 09d5: d5 5e 02  mov   $025e+x,a
 09d8: dd        mov   a,y
@@ -297,6 +317,7 @@
 0a06: d0 06     bne   $0a0e
 0a08: f5 36 02  mov   a,$0236+x
 0a0b: 5f 13 0a  jmp   $0a13
+
 0a0e: 3f 08 10  call  $1008
 0a11: f8 17     mov   x,$17
 0a13: 5c        lsr   a
@@ -361,6 +382,7 @@
 0a8e: 1d        dec   x
 0a8f: 30 03     bmi   $0a94
 0a91: 5f f4 09  jmp   $09f4
+
 0a94: 8f 4c f2  mov   $f2,#$4c
 0a97: fa 4e f3  mov   ($f3),($4e)
 0a9a: e4 4e     mov   a,$4e
@@ -444,10 +466,13 @@
 0b4b: 8f 00 64  mov   $64,#$00
 0b4e: 8d 80     mov   y,#$80
 0b50: 5f 52 0c  jmp   $0c52
+
 0b53: e4 92     mov   a,$92
 0b55: f0 03     beq   $0b5a
 0b57: 5f e0 17  jmp   $17e0
+
 0b5a: 6f        ret
+
 0b5b: e4 53     mov   a,$53
 0b5d: 10 0c     bpl   $0b6b
 0b5f: 28 1f     and   a,#$1f
@@ -459,6 +484,7 @@
 0b6e: 8f 3d f2  mov   $f2,#$3d
 0b71: fa 55 f3  mov   ($f3),($55)
 0b74: 6f        ret
+
 0b75: 4d        push  x
 0b76: e4 f6     mov   a,$f6
 0b78: f0 4c     beq   $0bc6
@@ -499,7 +525,9 @@
 0bc3: fa 20 f7  mov   ($f7),($20)
 0bc6: ce        pop   x
 0bc7: 6f        ret
+
 0bc8: 1f 5c 19  jmp   ($195c+x)
+
 0bcb: 3f 06 0f  call  $0f06
 0bce: e8 01     mov   a,#$01
 0bd0: 8d 08     mov   y,#$08
@@ -509,14 +537,18 @@
 0bda: 8f 00 f3  mov   $f3,#$00
 0bdd: 8f ff 23  mov   $23,#$ff
 0be0: 6f        ret
+
 0be1: da 42     movw  $42,ya
 0be3: 8f ff 41  mov   $41,#$ff
 0be6: 6f        ret
+
 0be7: c4 5a     mov   $5a,a
 0be9: 6f        ret
+
 0bea: e8 00     mov   a,#$00
 0bec: c5 07 02  mov   $0207,a
 0bef: 6f        ret
+
 0bf0: cd 01     mov   x,#$01
 0bf2: 2d        push  a
 0bf3: e8 00     mov   a,#$00
@@ -529,9 +561,11 @@
 0c03: cc 0a 02  mov   $020a,y
 0c06: c9 09 02  mov   $0209,x
 0c09: 6f        ret
+
 0c0a: 8d ff     mov   y,#$ff
 0c0c: cc 05 02  mov   $0205,y
 0c0f: 5f a9 0c  jmp   $0ca9
+
 0c12: 3f 65 18  call  $1865
 0c15: e5 fc 19  mov   a,$19fc
 0c18: c5 33 06  mov   $0633,a
@@ -554,11 +588,13 @@
 0c43: 1d        dec   x
 0c44: 10 fa     bpl   $0c40
 0c46: 6f        ret
+
 0c47: 8f 00 64  mov   $64,#$00
 0c4a: 68 00     cmp   a,#$00
 0c4c: d0 03     bne   $0c51
 0c4e: c5 46 05  mov   $0546,a
 0c51: 6f        ret
+
 0c52: c5 1d 02  mov   $021d,a
 0c55: cd 07     mov   x,#$07
 0c57: ad 80     cmp   y,#$80
@@ -587,16 +623,19 @@
 0c8e: 1d        dec   x
 0c8f: 10 c6     bpl   $0c57
 0c91: 6f        ret
+
 0c92: 2d        push  a
 0c93: e8 00     mov   a,#$00
 0c95: c5 06 02  mov   $0206,a
 0c98: ae        pop   a
 0c99: 5f fb 0b  jmp   $0bfb
+
 0c9c: 2d        push  a
 0c9d: e8 01     mov   a,#$01
 0c9f: c5 06 02  mov   $0206,a
 0ca2: ae        pop   a
 0ca3: 5f fb 0b  jmp   $0bfb
+
 0ca6: cc 05 02  mov   $0205,y
 0ca9: 8d 0e     mov   y,#$0e
 0cab: c5 1d 02  mov   $021d,a
@@ -653,6 +692,7 @@
 0d16: d0 a3     bne   $0cbb
 0d18: 8f 00 41  mov   $41,#$00
 0d1b: 6f        ret
+
 0d1c: 8d 07     mov   y,#$07
 0d1e: e4 47     mov   a,$47
 0d20: 24 45     and   a,$45
@@ -670,11 +710,13 @@
 0d3a: dc        dec   y
 0d3b: 10 e1     bpl   $0d1e
 0d3d: 6f        ret
+
 0d3e: e4 46     mov   a,$46
 0d40: d5 2e 02  mov   $022e+x,a
 0d43: e8 00     mov   a,#$00
 0d45: 6f        ret
-0d46: d8 3b     mov   $3b,x
+
+0d46: d8 3b     mov   $3b,x			; play sound (instrument)
 0d48: 2d        push  a
 0d49: f5 d5 07  mov   a,$07d5+x
 0d4c: c4 f2     mov   $f2,a
@@ -695,13 +737,13 @@
 0d6c: ae        pop   a
 0d6d: 8d 02     mov   y,#$02
 0d6f: 3f a9 0e  call  $0ea9
-0d72: da 0f     movw  $0f,ya
+0d72: da 0f     movw  $0f,ya			;get current voice and instrument
 0d74: f8 3b     mov   x,$3b
-0d76: f5 f5 07  mov   a,$07f5+x
+0d76: f5 f5 07  mov   a,$07f5+x			;get channel bit mask ID
 0d79: c4 56     mov   $56,a
-0d7b: 48 ff     eor   a,#$ff
+0d7b: 48 ff     eor   a,#$ff			;and store inversion
 0d7d: c4 57     mov   $57,a
-0d7f: 8d 00     mov   y,#$00
+0d7f: 8d 00     mov   y,#$00			;get mode flags
 0d81: f7 0f     mov   a,($0f)+y
 0d83: 2d        push  a
 0d84: e5 05 02  mov   a,$0205
@@ -716,25 +758,25 @@
 0d93: ae        pop   a
 0d94: d4 5b     mov   $5b+x,a
 0d96: c4 3c     mov   $3c,a
-0d98: 28 20     and   a,#$20
-0d9a: f0 05     beq   $0da1
-0d9c: 09 56 58  or    ($58),($56)
+0d98: 28 20     and   a,#$20			; is pitch modulation enabled? ($20 = pm)
+0d9a: f0 05     beq   $0da1			; if not...
+0d9c: 09 56 58  or    ($58),($56)		; turn pitch mod on
 0d9f: 2f 03     bra   $0da4
-0da1: 29 57 58  and   ($58),($57)
+0da1: 29 57 58  and   ($58),($57)		; turn pitch mod off
 0da4: 8f 2d f2  mov   $f2,#$2d
 0da7: fa 58 f3  mov   ($f3),($58)
-0daa: e4 3c     mov   a,$3c
-0dac: 28 10     and   a,#$10
-0dae: f0 2f     beq   $0ddf
-0db0: 8d 05     mov   y,#$05
+0daa: e4 3c     mov   a,$3c			; retrieve the saved flag
+0dac: 28 10     and   a,#$10			; is echo enabled? ($10 = echo)
+0dae: f0 2f     beq   $0ddf			; if not...
+0db0: 8d 05     mov   y,#$05			; get echo byte from sound
 0db2: f7 0f     mov   a,($0f)+y
 0db4: 8d 0c     mov   y,#$0c
 0db6: 3f a9 0e  call  $0ea9
 0db9: 8d 00     mov   y,#$00
-0dbb: f6 05 08  mov   a,$0805+y
-0dbe: c4 f2     mov   $f2,a
-0dc0: f7 18     mov   a,($18)+y
-0dc2: ad 01     cmp   y,#$01
+0dbb: f6 05 08  mov   a,$0805+y			; get the echo register values to "poke"
+0dbe: c4 f2     mov   $f2,a			; (from the table)
+0dc0: f7 18     mov   a,($18)+y			; now get info to feed to the registers
+0dc2: ad 01     cmp   y,#$01			; (from the echo environment)
 0dc4: f0 04     beq   $0dca
 0dc6: ad 02     cmp   y,#$02
 0dc8: d0 09     bne   $0dd3
@@ -744,23 +786,24 @@
 0dd1: e4 1e     mov   a,$1e
 0dd3: c4 f3     mov   $f3,a
 0dd5: fc        inc   y
-0dd6: ad 0c     cmp   y,#$0c
+0dd6: ad 0c     cmp   y,#$0c			;repeat for every byte of the array
 0dd8: 90 e1     bcc   $0dbb
 0dda: 09 56 59  or    ($59),($56)
 0ddd: 2f 03     bra   $0de2
-0ddf: 29 57 59  and   ($59),($57)
+0ddf: 29 57 59  and   ($59),($57)		;send the echo unit
 0de2: 8f 4d f2  mov   $f2,#$4d
 0de5: fa 59 f3  mov   ($f3),($59)
 0de8: e4 3c     mov   a,$3c
 0dea: 28 01     and   a,#$01
 0dec: 0d        push  psw
 0ded: 8d 01     mov   y,#$01
-0def: f7 0f     mov   a,($0f)+y
+0def: f7 0f     mov   a,($0f)+y			;now get the amplitude
 0df1: 8e        pop   psw
 0df2: d0 08     bne   $0dfc
 0df4: f8 3b     mov   x,$3b
 0df6: d5 36 02  mov   $0236+x,a
 0df9: 5f 12 0e  jmp   $0e12
+
 0dfc: 8d 04     mov   y,#$04
 0dfe: 3f a9 0e  call  $0ea9
 0e01: f8 3b     mov   x,$3b
@@ -796,6 +839,7 @@
 0e43: f8 3b     mov   x,$3b
 0e45: d5 76 02  mov   $0276+x,a
 0e48: 5f 78 0e  jmp   $0e78
+
 0e4b: 8d 08     mov   y,#$08
 0e4d: 3f a9 0e  call  $0ea9
 0e50: f8 3b     mov   x,$3b
@@ -813,6 +857,7 @@
 0e6b: d0 05     bne   $0e72
 0e6d: e8 ff     mov   a,#$ff
 0e6f: 5f 74 0e  jmp   $0e74
+
 0e72: e8 00     mov   a,#$00
 0e74: 8d 15     mov   y,#$15
 0e76: d7 15     mov   ($15)+y,a
@@ -826,6 +871,7 @@
 0e84: f8 3b     mov   x,$3b
 0e86: d5 7e 02  mov   $027e+x,a
 0e89: 5f a2 0e  jmp   $0ea2
+
 0e8c: 8d 0a     mov   y,#$0a
 0e8e: 3f a9 0e  call  $0ea9
 0e91: f8 3b     mov   x,$3b
@@ -838,7 +884,8 @@
 0ea2: 09 56 4d  or    ($4d),($56)
 0ea5: 09 56 48  or    ($48),($56)
 0ea8: 6f        ret
-0ea9: 8f 00 0e  mov   $0e,#$00
+
+0ea9: 8f 00 0e  mov   $0e,#$00		; load current song/sfx/etc. address into stack
 0eac: 1c        asl   a
 0ead: 2b 0e     rol   $0e
 0eaf: 60        clrc
@@ -855,6 +902,7 @@
 0ec5: c4 18     mov   $18,a
 0ec7: eb 19     mov   y,$19
 0ec9: 6f        ret
+
 0eca: cd 35     mov   x,#$35
 0ecc: 8d 0f     mov   y,#$0f
 0ece: 3f 1e 0f  call  $0f1e
@@ -885,6 +933,7 @@
 0f00: c4 4f     mov   $4f,a
 0f02: 8f 00 1e  mov   $1e,#$00
 0f05: 6f        ret
+
 0f06: e5 e1 19  mov   a,$19e1
 0f09: 8f 6d f2  mov   $f2,#$6d
 0f0c: c4 f3     mov   $f3,a
@@ -897,6 +946,7 @@
 0f19: ab 05     inc   $05
 0f1b: d0 f8     bne   $0f15
 0f1d: 6f        ret
+
 0f1e: d8 04     mov   $04,x
 0f20: cb 05     mov   $05,y
 0f22: 8d 00     mov   y,#$00
@@ -911,6 +961,7 @@
 0f32: d0 f0     bne   $0f24
 0f34: 6f        ret
 
+; pre-defined DSP flags
 0f35: db $6c,$3f,$3d,$00,$4d,$00,$7d,$00,$6d,$ff,$5d,$1a,$5c,$00,$2d,$00,$05,$00,$15,$00,$25,$00,$35,$00,$45,$00,$55,$00,$65,$00,$75,$00,$07,$00,$17,$00,$27,$00,$37,$00,$47,$00,$57,$00,$67,$00,$77,$00,$7c,$00,$2c,$00,$3c,$00,$0c,$00,$1c,$00,$04,$00,$14,$00,$24,$00,$34,$00,$44,$00,$54,$00,$64,$00,$74,$00,$ff
 
 0f80: da 2f     movw  $2f,ya
@@ -986,6 +1037,7 @@
 1001: d7 15     mov   ($15)+y,a
 1003: c4 28     mov   $28,a
 1005: 5f b6 10  jmp   $10b6
+
 1008: 8d 14     mov   y,#$14
 100a: f7 15     mov   a,($15)+y
 100c: f0 39     beq   $1047
@@ -1005,6 +1057,7 @@
 1027: 78 02 29  cmp   $29,#$02
 102a: 90 03     bcc   $102f
 102c: 5f b6 10  jmp   $10b6
+
 102f: 8d 0c     mov   y,#$0c
 1031: f7 15     mov   a,($15)+y
 1033: bc        inc   a
@@ -1025,6 +1078,7 @@
 104d: f7 15     mov   a,($15)+y
 104f: ee        pop   y
 1050: 6f        ret
+
 1051: 8d 0c     mov   y,#$0c
 1053: d7 15     mov   ($15)+y,a
 1055: 8d 06     mov   y,#$06
@@ -1067,6 +1121,7 @@
 1098: 68 ff     cmp   a,#$ff
 109a: f0 03     beq   $109f
 109c: 5f af 10  jmp   $10af
+
 109f: 8d 0c     mov   y,#$0c
 10a1: f7 15     mov   a,($15)+y
 10a3: 8d 01     mov   y,#$01
@@ -1090,6 +1145,7 @@
 10c8: 1d        dec   x
 10c9: 10 f8     bpl   $10c3
 10cb: 5f 36 11  jmp   $1136
+
 10ce: 3f 48 11  call  $1148
 10d1: 8d 06     mov   y,#$06
 10d3: f7 15     mov   a,($15)+y
@@ -1153,8 +1209,10 @@
 1143: d7 15     mov   ($15)+y,a
 1145: ba 24     movw  ya,$24
 1147: 6f        ret
+
 1148: 8d 0a     mov   y,#$0a
 114a: 5f 4f 11  jmp   $114f
+
 114d: 8d 08     mov   y,#$08
 114f: f7 15     mov   a,($15)+y
 1151: c4 1a     mov   $1a,a
@@ -1162,6 +1220,7 @@
 1154: f7 15     mov   a,($15)+y
 1156: c4 1b     mov   $1b,a
 1158: 6f        ret
+
 1159: 2d        push  a
 115a: 3f 4d 11  call  $114d
 115d: 8d 06     mov   y,#$06
@@ -1178,12 +1237,14 @@
 116f: e4 1b     mov   a,$1b
 1171: d7 15     mov   ($15)+y,a
 1173: 6f        ret
+
 1174: c8 00     cmp   x,#$00
 1176: d0 05     bne   $117d
 1178: e8 ff     mov   a,#$ff
 117a: fd        mov   y,a
 117b: 5d        mov   x,a
 117c: 6f        ret
+
 117d: cb 2c     mov   $2c,y
 117f: 3e 2c     cmp   x,$2c
 1181: f0 02     beq   $1185
@@ -1205,9 +1266,11 @@
 119a: 9e        div   ya,x
 119b: f8 2d     mov   x,$2d
 119d: 6f        ret
+
 119e: 9e        div   ya,x
 119f: cd 00     mov   x,#$00
 11a1: 6f        ret
+
 11a2: f5 86 02  mov   a,$0286+x
 11a5: 8d 04     mov   y,#$04
 11a7: cf        mul   ya
@@ -1231,6 +1294,7 @@
 11c7: f7 31     mov   a,($31)+y
 11c9: c4 53     mov   $53,a
 11cb: 6f        ret
+
 11cc: ad 04     cmp   y,#$04
 11ce: 90 06     bcc   $11d6
 11d0: d0 0a     bne   $11dc
@@ -1238,6 +1302,7 @@
 11d4: b0 06     bcs   $11dc
 11d6: 8f ff 54  mov   $54,#$ff
 11d9: 5f f2 11  jmp   $11f2
+
 11dc: ad 80     cmp   y,#$80
 11de: 90 0f     bcc   $11ef
 11e0: 8f 00 54  mov   $54,#$00
@@ -1249,13 +1314,14 @@
 11ea: fd        mov   y,a
 11eb: 7d        mov   a,x
 11ec: 5f f2 11  jmp   $11f2
+
 11ef: 8f 04 54  mov   $54,#$04
 11f2: cd f0     mov   x,#$f0
 11f4: 9e        div   ya,x
 11f5: 78 ff 54  cmp   $54,#$ff
 11f8: d0 02     bne   $11fc
 11fa: c4 54     mov   $54,a
-11fc: f6 17 12  mov   a,$1217+y
+11fc: f6 17 12  mov   a,$1217+y			;get pitch value (from table)
 11ff: c4 2f     mov   $2f,a
 1201: f6 07 13  mov   a,$1307+y
 1204: c4 30     mov   $30,a
@@ -1270,12 +1336,16 @@
 1214: ba 2f     movw  ya,$2f
 1216: 6f        ret
 
+; pitch table (low byte)
 1217: db $00,$18,$2f,$47,$5f,$77,$8f,$a7,$bf,$d8,$f0,$08,$21,$39,$52,$6b,$83,$9c,$b5,$ce,$e7,$00,$19,$33,$4c,$65,$7f,$98,$b2,$cc,$e5,$ff,$19,$33,$4d,$67,$82,$9c,$b6,$d1,$eb,$06,$20,$3b,$56,$71,$8c,$a7,$c2,$dd,$f9,$14,$2f,$4b,$67,$82,$9e,$ba,$d6,$f2,$0e,$2a,$46,$63,$7f,$9c,$b8,$d5,$f2,$0f,$2b,$48,$66,$83,$a0,$bd,$db,$f8,$16,$34,$51,$6f,$8d,$ab,$c9,$e7,$06,$24,$43,$61,$80,$9e,$bd,$dc,$fb,$1a,$39,$59,$78,$97,$b7,$d7,$f6,$16,$36,$56,$76,$96,$b7,$d7,$f7,$18,$39,$59,$7a,$9b,$bc,$dd,$ff,$20,$41,$63,$84,$a6,$c8,$ea,$0c,$2e,$50,$72,$95,$b7,$da,$fc,$1f,$42,$65,$88,$ab,$cf,$f2,$16,$39,$5d,$81,$a5,$c9,$ed,$11,$35,$5a,$7e,$a3,$c8,$ed,$12,$37,$5c,$81,$a6,$cc,$f2,$17,$3d,$63,$89,$af,$d6,$fc,$22,$49,$70,$97,$be,$e5,$0c,$33,$5a,$82,$aa,$d1,$f9,$21,$49,$71,$9a,$c2,$eb,$13,$3c,$65,$8e,$b7,$e0,$0a,$33,$5d,$87,$b0,$da,$04,$2f,$59,$84,$ae,$d9,$04,$2f,$5a,$85,$b0,$dc,$07,$33,$5f,$8b,$b7,$e3,$0f,$3c,$68,$95,$c2,$ef,$1c,$49,$77,$a4,$d2,$00,$2e,$5c,$8a,$b8,$e7,$15,$44,$73,$a2,$d1
 
+; pitch table (high byte)
 1307: db $20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$21,$21,$21,$21,$21,$21,$21,$21,$21,$21,$22,$22,$22,$22,$22,$22,$22,$22,$22,$22,$22,$23,$23,$23,$23,$23,$23,$23,$23,$23,$24,$24,$24,$24,$24,$24,$24,$24,$24,$24,$25,$25,$25,$25,$25,$25,$25,$25,$25,$26,$26,$26,$26,$26,$26,$26,$26,$26,$27,$27,$27,$27,$27,$27,$27,$27,$27,$28,$28,$28,$28,$28,$28,$28,$28,$29,$29,$29,$29,$29,$29,$29,$29,$29,$2a,$2a,$2a,$2a,$2a,$2a,$2a,$2a,$2b,$2b,$2b,$2b,$2b,$2b,$2b,$2b,$2c,$2c,$2c,$2c,$2c,$2c,$2c,$2c,$2d,$2d,$2d,$2d,$2d,$2d,$2d,$2e,$2e,$2e,$2e,$2e,$2e,$2e,$2e,$2f,$2f,$2f,$2f,$2f,$2f,$2f,$30,$30,$30,$30,$30,$30,$30,$31,$31,$31,$31,$31,$31,$31,$32,$32,$32,$32,$32,$32,$32,$33,$33,$33,$33,$33,$33,$33,$34,$34,$34,$34,$34,$34,$35,$35,$35,$35,$35,$35,$35,$36,$36,$36,$36,$36,$36,$37,$37,$37,$37,$37,$37,$38,$38,$38,$38,$38,$38,$39,$39,$39,$39,$39,$39,$3a,$3a,$3a,$3a,$3a,$3a,$3b,$3b,$3b,$3b,$3b,$3b,$3c,$3c,$3c,$3c,$3c,$3c,$3d,$3d,$3d,$3d,$3d,$3e,$3e,$3e,$3e,$3e,$3e,$3f,$3f,$3f,$3f,$3f
 
+; note interval frequencies (low byte)
 13f7: db $30,$20,$ac,$10,$24,$38,$4c,$60,$74,$88,$9c,$b0,$c4,$d8,$ec,$00,$14,$28,$3c,$50,$64,$78,$8c,$a0,$b4,$c8,$dc,$f0,$54,$e0,$d0,$c0
 
+; note interval frequencies (high byte)
 1417: db $fd,$fe,$fe,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$01,$01,$02,$03
 
 1437: e4 64     mov   a,$64
@@ -1295,11 +1365,13 @@
 1454: f4 68     mov   a,$68+x
 1456: 5d        mov   x,a
 1457: 1f e0 18  jmp   ($18e0+x)
+
 145a: 8b 66     dec   $66
 145c: 8b 66     dec   $66
 145e: 8b 65     dec   $65
 1460: 10 ed     bpl   $144f
 1462: 6f        ret
+
 1463: f8 65     mov   x,$65
 1465: 9b 9b     dec   $9b+x
 1467: d0 f1     bne   $145a
@@ -1311,6 +1383,7 @@
 1474: e8 04     mov   a,#$04
 1476: d4 68     mov   $68+x,a
 1478: 5f 7b 14  jmp   $147b
+
 147b: f8 65     mov   x,$65
 147d: f4 82     mov   a,$82+x
 147f: 68 19     cmp   a,#$19
@@ -1333,21 +1406,23 @@
 14a1: 74 73     cmp   a,$73+x
 14a3: d0 03     bne   $14a8
 14a5: 5f fd 16  jmp   $16fd
+
 14a8: 3f bd 15  call  $15bd
-14ab: fd        mov   y,a
+14ab: fd        mov   y,a		; get the current note/command
 14ac: 28 20     and   a,#$20
 14ae: c4 67     mov   $67,a
 14b0: f8 65     mov   x,$65
-14b2: ad 80     cmp   y,#$80
+14b2: ad 80     cmp   y,#$80		; is it a note?
 14b4: 90 3d     bcc   $14f3
-14b6: ad f0     cmp   y,#$f0
+14b6: ad f0     cmp   y,#$f0		; is it a special meaning flag?
 14b8: 90 08     bcc   $14c2
-14ba: dd        mov   a,y
+14ba: dd        mov   a,y		; then it must be a command...
 14bb: 28 0f     and   a,#$0f
 14bd: 1c        asl   a
 14be: 5d        mov   x,a
-14bf: 1f 3e 18  jmp   ($183e+x)
-14c2: f5 67 05  mov   a,$0567+x
+14bf: 1f 3e 18  jmp   ($183e+x)		; jump to command number position
+
+14c2: f5 67 05  mov   a,$0567+x		; pitch bend
 14c5: f0 4c     beq   $1513
 14c7: dd        mov   a,y
 14c8: 28 08     and   a,#$08
@@ -1375,10 +1450,10 @@
 14ed: a8 00     sbc   a,#$00
 14ef: d4 bf     mov   $bf+x,a
 14f1: 2f 20     bra   $1513
-14f3: f5 67 05  mov   a,$0567+x
+14f3: f5 67 05  mov   a,$0567+x			; play the note (check first)
 14f6: f0 1b     beq   $1513
 14f8: dd        mov   a,y
-14f9: 28 1f     and   a,#$1f
+14f9: 28 1f     and   a,#$1f			; get the actual note value
 14fb: fd        mov   y,a
 14fc: f8 66     mov   x,$66
 14fe: f4 ae     mov   a,$ae+x
@@ -1397,6 +1472,7 @@
 151a: f8 65     mov   x,$65
 151c: f4 68     mov   a,$68+x
 151e: 5f 4f 14  jmp   $144f
+
 1521: f8 65     mov   x,$65
 1523: d4 a3     mov   $a3+x,a
 1525: fd        mov   y,a
@@ -1413,6 +1489,7 @@
 153c: 75 2e 02  cmp   a,$022e+x
 153f: b0 05     bcs   $1546
 1541: 5f 5a 14  jmp   $145a
+
 1544: e8 40     mov   a,#$40
 1546: d5 2e 02  mov   $022e+x,a
 1549: e8 01     mov   a,#$01
@@ -1451,6 +1528,7 @@
 158d: e4 3f     mov   a,$3f
 158f: d5 4e 02  mov   $024e+x,a
 1592: 5f 5a 14  jmp   $145a
+
 1595: f8 65     mov   x,$65
 1597: f5 4f 05  mov   a,$054f+x
 159a: 60        clrc
@@ -1468,22 +1546,28 @@
 15b5: eb ac     mov   y,$ac
 15b7: 3f 46 0d  call  $0d46
 15ba: 5f 5a 14  jmp   $145a
+
 15bd: f8 66     mov   x,$66
 15bf: e7 72     mov   a,($72+x)
-15c1: bb 72     inc   $72+x
+15c1: bb 72     inc   $72+x			; update melody (sequence) position pointer
 15c3: d0 02     bne   $15c7
 15c5: bb 73     inc   $73+x
 15c7: 6f        ret
+
+; vcmd f0 - end of sequence
 15c8: f8 65     mov   x,$65
 15ca: e8 00     mov   a,#$00
 15cc: d4 68     mov   $68+x,a
 15ce: 8b 64     dec   $64
 15d0: 5f 5a 14  jmp   $145a
+
+; vcmd f1 - delta expression
 15d3: f8 65     mov   x,$65
 15d5: f5 57 05  mov   a,$0557+x
 15d8: 3f f6 15  call  $15f6
 15db: d5 57 05  mov   $0557+x,a
 15de: 5f 7b 14  jmp   $147b
+
 15e1: 6d        push  y
 15e2: 4d        push  x
 15e3: ee        pop   y
@@ -1501,7 +1585,8 @@
 15f3: fd        mov   y,a
 15f4: 7d        mov   a,x
 15f5: 6f        ret
-15f6: 4d        push  x
+
+15f6: 4d        push  x			; scale volume - get 2 bytes
 15f7: fd        mov   y,a
 15f8: 6d        push  y
 15f9: 3f bd 15  call  $15bd
@@ -1523,10 +1608,14 @@
 1613: e8 7f     mov   a,#$7f
 1615: ce        pop   x
 1616: 6f        ret
+
+; vcmd f2 - absolute expression
 1617: 3f bd 15  call  $15bd
 161a: f8 65     mov   x,$65
 161c: d5 57 05  mov   $0557+x,a
 161f: 5f 7b 14  jmp   $147b
+
+; vcmd f3 - mute
 1622: f8 65     mov   x,$65
 1624: f5 6f 05  mov   a,$056f+x
 1627: 30 15     bmi   $163e
@@ -1539,6 +1628,8 @@
 1636: f6 d5 07  mov   a,$07d5+y
 1639: c4 f2     mov   $f2,a
 163b: 8f 9f f3  mov   $f3,#$9f
+
+; vcmd f4 - rest
 163e: 3f bd 15  call  $15bd
 1641: f8 65     mov   x,$65
 1643: d4 a3     mov   $a3+x,a
@@ -1546,11 +1637,13 @@
 1648: d4 9b     mov   $9b+x,a
 164a: 3f 25 18  call  $1825
 164d: 5f 5a 14  jmp   $145a
-1650: 3f bd 15  call  $15bd
+
+; vcmd f5 - set sound/instrument
+1650: 3f bd 15  call  $15bd		; get 1 more byte = read sound number
 1653: f8 65     mov   x,$65
-1655: d5 5f 05  mov   $055f+x,a
+1655: d5 5f 05  mov   $055f+x,a		; move it onto the stack
 1658: f4 82     mov   a,$82+x
-165a: 68 19     cmp   a,#$19
+165a: 68 19     cmp   a,#$19		; $19 = phrase stack max value?
 165c: f0 32     beq   $1690
 165e: 60        clrc
 165f: 94 8a     adc   a,$8a+x
@@ -1578,36 +1671,38 @@
 168b: f8 65     mov   x,$65
 168d: d5 5f 05  mov   $055f+x,a
 1690: 5f 7b 14  jmp   $147b
+
+; vcmd f6 - play phrase
 1693: f8 65     mov   x,$65
-1695: f4 82     mov   a,$82+x
+1695: f4 82     mov   a,$82+x		; push entry onto stack
 1697: 80        setc
 1698: a8 05     sbc   a,#$05
 169a: d4 82     mov   $82+x,a
-169c: 60        clrc
+169c: 60        clrc			; set to current player
 169d: 94 8a     adc   a,$8a+x
 169f: fd        mov   y,a
 16a0: cb 00     mov   $00,y
 16a2: f8 66     mov   x,$66
 16a4: f4 72     mov   a,$72+x
-16a6: d6 3b 06  mov   $063b+y,a
+16a6: d6 3b 06  mov   $063b+y,a		; LSB of pointer
 16a9: f4 73     mov   a,$73+x
-16ab: d6 3c 06  mov   $063c+y,a
+16ab: d6 3c 06  mov   $063c+y,a		; MSB of pointer
 16ae: e8 00     mov   a,#$00
-16b0: d6 38 06  mov   $0638+y,a
-16b3: 3f bd 15  call  $15bd
+16b0: d6 38 06  mov   $0638+y,a		; number of loops
+16b3: 3f bd 15  call  $15bd		; start point low byte
 16b6: 2d        push  a
-16b7: 3f bf 15  call  $15bf
+16b7: 3f bf 15  call  $15bf		; start point high byte
 16ba: 2d        push  a
-16bb: 3f bf 15  call  $15bf
-16be: 3f bf 15  call  $15bf
-16c1: 3f bf 15  call  $15bf
-16c4: 3f bf 15  call  $15bf
+16bb: 3f bf 15  call  $15bf		; end point low byte
+16be: 3f bf 15  call  $15bf		; end point high byte
+16c1: 3f bf 15  call  $15bf		; number of loops
+16c4: 3f bf 15  call  $15bf		; frequency offset LSB low byte
 16c7: fd        mov   y,a
-16c8: 3f bf 15  call  $15bf
+16c8: 3f bf 15  call  $15bf		; frequency offset LSB high byte
 16cb: 2d        push  a
 16cc: dd        mov   a,y
 16cd: 60        clrc
-16ce: 95 77 05  adc   a,$0577+x
+16ce: 95 77 05  adc   a,$0577+x		; adjust frequency
 16d1: d5 77 05  mov   $0577+x,a
 16d4: ae        pop   a
 16d5: 95 78 05  adc   a,$0578+x
@@ -1616,9 +1711,9 @@
 16dd: f5 57 05  mov   a,$0557+x
 16e0: eb 00     mov   y,$00
 16e2: d6 3a 06  mov   $063a+y,a
-16e5: 3f f6 15  call  $15f6
+16e5: 3f f6 15  call  $15f6		; scale the volume (read next 2 bytes)
 16e8: d5 57 05  mov   $0557+x,a
-16eb: eb 00     mov   y,$00
+16eb: eb 00     mov   y,$00		; initialize instrument pointer
 16ed: e8 00     mov   a,#$00
 16ef: d6 39 06  mov   $0639+y,a
 16f2: f8 66     mov   x,$66
@@ -1627,6 +1722,7 @@
 16f7: ae        pop   a
 16f8: d4 72     mov   $72+x,a
 16fa: 5f 7b 14  jmp   $147b
+
 16fd: eb 00     mov   y,$00
 16ff: f6 38 06  mov   a,$0638+y
 1702: bc        inc   a
@@ -1644,6 +1740,7 @@
 171b: f7 04     mov   a,($04)+y
 171d: d4 73     mov   $73+x,a
 171f: 5f a8 14  jmp   $14a8
+
 1722: f5 77 05  mov   a,$0577+x
 1725: 80        setc
 1726: 8d 05     mov   y,#$05
@@ -1679,6 +1776,8 @@
 1764: 88 05     adc   a,#$05
 1766: d4 82     mov   $82+x,a
 1768: 5f 7b 14  jmp   $147b
+
+; vcmd f7-f8 - set detune
 176b: 28 02     and   a,#$02
 176d: c4 67     mov   $67,a
 176f: 3f bd 15  call  $15bd
@@ -1689,6 +1788,8 @@
 177b: d4 be     mov   $be+x,a
 177d: d4 bf     mov   $bf+x,a
 177f: 5f 13 15  jmp   $1513
+
+; vcmd f9 - go to loop
 1782: eb 65     mov   y,$65
 1784: fc        inc   y
 1785: f7 70     mov   a,($70)+y
@@ -1706,6 +1807,8 @@
 179e: d5 4f 05  mov   $054f+x,a
 17a1: d5 57 05  mov   $0557+x,a
 17a4: 5f 7b 14  jmp   $147b
+
+; vcmd fa - set tempo
 17a7: 3f bd 15  call  $15bd
 17aa: c5 00 02  mov   $0200,a
 17ad: 3f bd 15  call  $15bd
@@ -1713,6 +1816,7 @@
 17b3: 3f bd 15  call  $15bd
 17b6: c5 03 02  mov   $0203,a
 17b9: 5f 7b 14  jmp   $147b
+
 17bc: 8f ff 92  mov   $92,#$ff
 17bf: 8f 20 93  mov   $93,#$20
 17c2: 8f 00 64  mov   $64,#$00
@@ -1728,9 +1832,11 @@
 17da: 8f 00 95  mov   $95,#$00
 17dd: d8 97     mov   $97,x
 17df: 6f        ret
+
 17e0: 8b 93     dec   $93
 17e2: f0 01     beq   $17e5
 17e4: 6f        ret
+
 17e5: eb 96     mov   y,$96
 17e7: f7 94     mov   a,($94)+y
 17e9: 24 98     and   a,$98
@@ -1758,9 +1864,11 @@
 181d: 8f 00 96  mov   $96,#$00
 1820: e8 00     mov   a,#$00
 1822: 5f a9 0c  jmp   $0ca9
+
 1825: e8 02     mov   a,#$02
 1827: d4 68     mov   $68+x,a
 1829: 6f        ret
+
 182a: 78 80 ad  cmp   $ad,#$80
 182d: 90 08     bcc   $1837
 182f: 60        clrc
@@ -1768,12 +1876,24 @@
 1832: 10 09     bpl   $183d
 1834: e8 00     mov   a,#$00
 1836: 6f        ret
+
 1837: 84 ad     adc   a,$ad
 1839: 10 02     bpl   $183d
 183b: e8 7f     mov   a,#$7f
 183d: 6f        ret
 
-183e: dw $15c8,$15d3,$1617,$1622,$163e,$1650,$1693,$176b,$176b,$1782,$17a7
+; vcmd table (f0-fa)
+183e: dw $15c8		; f0 - end of melody
+1840: dw $15d3		; f1 - delta expression
+1842: dw $1617		; f2 - absolute expression
+1844: dw $1622		; f3 - mute
+1846: dw $163e		; f4 - rest
+1848: dw $1650		; f5 - set sound/instrument
+184a: dw $1693		; f6 - play phrase
+184c: dw $176b		; f7 - set detune
+184e: dw $176b		; f8 - set detune
+1850: dw $1782		; f9 - go to loop
+1852: dw $17a7		; fa - set tempo
 
 1854: e4 01     mov   a,$01
 1856: 1c        asl   a
@@ -1786,6 +1906,7 @@
 1860: 2b 01     rol   $01
 1862: e4 03     mov   a,$03
 1864: 6f        ret
+
 1865: 8f 00 92  mov   $92,#$00
 1868: 8d 1a     mov   y,#$1a
 186a: 3f a9 0e  call  $0ea9
@@ -1843,12 +1964,15 @@
 18db: 3e 63     cmp   x,$63
 18dd: 90 a0     bcc   $187f
 18df: 6f        ret
-18e0: 5a 14     cmpw  ya,$14
-18e2: 63 14 7b  bbs3  $14,$1960
-18e5: 14 ba     or    a,$ba+x
-18e7: 21        tcall 2
+
+18e0: dw $145a
+18e2: dw $1463
+18e4: dw $147b
+
+18e6: ba 21     movw  ya,$21
 18e8: da 0a     movw  $0a,ya
 18ea: 6f        ret
+
 18eb: eb 21     mov   y,$21
 18ed: fa 1f f6  mov   ($f6),($1f)
 18f0: 00        nop
@@ -1875,6 +1999,7 @@
 1912: 8f b1 f1  mov   $f1,#$b1
 1915: fa 1f f6  mov   ($f6),($1f)
 1918: 6f        ret
+
 1919: eb 21     mov   y,$21
 191b: fa 1f f6  mov   ($f6),($1f)
 191e: e4 f6     mov   a,$f6
@@ -1909,4 +2034,6 @@
 195a: 3a 0a     incw  $0a
 195c: 6f        ret
 
-195e: dw $0bcb,$0c0a,$0c12
+195e: dw $0bcb
+1860: dw $0c0a
+1862: dw $0c12
